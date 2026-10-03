@@ -1,0 +1,45 @@
+1-Bulut (Ensari POS Bulut) — İÇİNDEKİLER  (29.09.2026)
+=========================================================
+Servis: EnsariPosCloud (port 8888). Web sunucusu (C:\Projeler\0-Sunucu\caddy) tüm
+*.ornek-alanadi.com adreslerini buraya yönlendirir.
+
+ANA DOSYALAR
+  server.js             Ana sunucu (başlangıç noktası)
+  auth.js, db.js        Giriş/oturum ve veritabanı bağlantısı
+  schema.sql            Veritabanı tablo tanımları
+  config.json           Sunucu ayarları (gizli bilgi içerir, paylaşmayın)
+  sms-config.json       SMS hesabı ayarları (gizli)
+  backup-once.js        Günlük yedek betiği (zamanlanmış görev her gün 04:00 çalıştırır)
+  bootstrap-admin.js    İlk yönetici hesabını oluşturma aracı
+  baslat.bat            Elle başlatma (normalde servis çalıştırır, gerek yok)
+  1-ONCE-BUNU-OKU.txt   Ürünlerle ilgili ayrıntılı notlar
+
+KLASÖRLER
+  routes\               Panel ve API uçları
+  lib\                  Ortak yardımcılar (SMS, yedekleme, lisans ...)
+  public\               Web panelleri:
+                          admin\ (yönetici), dealer\ (bayi), customer\ (müşteri),
+                          courier\ + kurye-restoran\ (kurye bulut), patron2\ (patron),
+                          gk\ gk-ultra\ gs\ (Gelişmiş Kurye / Ultra / Garson ekranları),
+                          agent-update\ gk-agent-update\ patron-update\ (restoranlara kurulu
+                          ajanların otomatik güncelleme dosyaları),
+                          indirmeler.js (tüm panellerdeki "İndirmeler" listesi: uygulamalar,
+                          APK'lar, panel linkleri — yeni ürün/APK eklenince burası güncellenir)
+  data\                 Veritabanı (cloud.db) ve oturumlar — SİLMEYİN
+  backups\              Günlük veritabanı yedekleri (son 14 gün tutulur)
+
+ÜRÜN BAĞLANTILARI (restoran bilgisayarlarına tünel)
+  KuryeSistemi\         Gelişmiş Kurye  -> kuryeler.ornek-alanadi.com
+  UltraPaketci\         Ultra Paketçi   -> ultra.ornek-alanadi.com
+  GarsonSistemi\        Garson          -> garson.ornek-alanadi.com
+  QRMenu\               QR Menü         -> menu.ornek-alanadi.com, app.ornek-alanadi.com/qrmenu
+  Patron\               Patron Raporu   -> patron2.ornek-alanadi.com
+  KuryeBulut\kurye-bulut-ajan\   "AlfaPOS Bulut" ajanının kaynak kodu (restorana kurulan program)
+
+KURULUM
+  AlfaPOSBulutSetup.iss AlfaPOS Bulut (Kurye + Patron + QR) kurulumu; Patron kısmını
+                        C:\Projeler\7-Patron-Raporu'dan alır -> dist\AlfaPOSBulutSetup.exe
+  deploy\               İleride bir VPS'e taşımak için rehber (içindeki yollar eski)
+
+LOGLAR
+  service-out.log / service-err.log   Servisin çıktıları

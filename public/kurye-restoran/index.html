@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kurye Yönetimi — AlfaPOS Bulut</title>
+<link rel="stylesheet" href="/shared.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="manifest" href="/kurye-restoran/manifest.webmanifest">
+<link rel="icon" href="/courier/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/courier/icons/icon-192.png">
+<meta name="theme-color" content="#2563EB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Restoran">
+</head>
+<body>
+  <!-- Restoran sahibinin SADECE kurye yonetimi paneli (kuryebulut.ornek-alanadi.com/restoran).
+       Musteri panelinin (app.ornek-alanadi.com/customer) kurye-ile-ilgili kisimlarinin
+       BAGIMSIZ bir kopyasidir: ayni giris/ayni backend uc noktalari, ama Patron
+       Raporu ve QR Menu icerigi bu dosyada hic YOKTUR - calisma aninda gizlenmez,
+       en bastan bulunmaz. Sekme cubugu da yok: geriye kalan 4 bolum tek bir
+       kaydirilabilir sayfada alt alta durur. -->
+  <div id="login" class="center-wrap">
+    <div class="card">
+      <h1 style="margin-bottom:16px">Kurye Yönetimi</h1>
+      <div class="tabs">
+        <button id="tabLogin" class="active">Giriş yap</button>
+        <button id="tabActivate">İlk kurulum</button>
+      </div>
+
+      <div id="loginErr" class="err" hidden></div>
+      <form id="loginForm">
+        <div class="field"><label>E-posta, işletme adı veya aktivasyon anahtarı</label><input id="username" required></div>
+        <div class="field"><label>Şifre</label><input type="password" id="password" required autocomplete="current-password"></div>
+        <button class="btn primary" type="submit">Giriş yap</button>
+      </form>
+
+      <form id="activateForm" hidden>
+        <p class="muted" style="margin:0 0 12px">Kurulum sırasında size verilen aktivasyon anahtarıyla ilk şifrenizi belirleyin.</p>
+        <div class="field"><label>Aktivasyon anahtarı</label><input id="actKey" required></div>
+        <div class="field"><label>Yeni şifre</label><input type="password" id="actPassword" required></div>
+        <button class="btn primary" type="submit">Şifremi belirle</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="topbar">
+      <h1 id="bizName">Kurye Yönetimi</h1>
+      <div style="display:flex;gap:8px">
+        <button id="themeToggle" class="btn small" aria-label="Tema değiştir">🌙</button>
+        <button class="btn small" id="logoutBtn">Çıkış</button>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="card">
+        <h2>Bugün</h2>
+        <div class="card-grid">
+          <div class="stat"><div class="n" id="statDelivered">—</div><div class="l">Teslim edilen</div></div>
+          <div class="stat"><div class="n" id="statRevenue">—</div><div class="l">Tahsilat</div></div>
+          <div class="stat"><div class="n" id="statActiveCouriers">—</div><div class="l">Aktif kurye</div></div>
+        </div>
+      </div>
+
+      <div class="card" id="unassignedCard" hidden>
+        <h2 style="color:var(--warn)">⚠️ Ataması yapılmamış paketler</h2>
+        <div id="unassignedList"></div>
+      </div>
+
+      <div class="card">
+        <h2>Kuryeler — kimde ne kadar tutar var <span id="orderCount" class="muted"></span></h2>
+        <p class="muted" style="margin:0 0 12px">Her kuryenin üzerindeki toplam tutar, bekleyen/yoldaki paket sayısı ve giriş PIN'i.</p>
+        <div id="courierList"></div>
+      </div>
+
+      <div class="card" id="mapCard">
+        <h2>Canlı kurye konumları</h2>
+        <p class="muted" style="margin:0 0 12px">Kurye, telefonunda konum paylaşımına izin verdiyse burada görünür.</p>
+        <div id="map" style="height:360px;border-radius:12px;overflow:hidden"></div>
+        <div id="locationList" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="margin-bottom:14px">
+          <h2 style="margin:0">Teslimat Raporu</h2>
+          <input type="date" id="reportDate" style="width:auto">
+        </div>
+        <div id="reportGrid" class="card-grid"></div>
+      </div>
+
+      <!-- Uygulamalar, APK'lar ve panel linkleri - liste /indirmeler.js'te (tum paneller ortak) -->
+      <div id="indirmelerBox" data-mode="customer"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- snapshot.js DEGISTIRILMEDI - buradan sadece ortak money() bicimleyicisi
+       kullanilir; renderSnapshot() (Patron Raporu ciktisi) bu panelde cagrilmaz. -->
+  <script src="/snapshot.js"></script>
+  <script src="/indirmeler.js"></script>
+  <script src="/kurye-restoran/app.js"></script>
+  <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('/kurye-restoran/sw.js').catch(() => {})); }</script>
+</body>
+</html>

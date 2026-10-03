@@ -1,0 +1,13 @@
+{
+  "name": "ensari-pos-cloud",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ensari POS merkezi sunucu (yonetici / bayi / musteri panelleri + ajan WebSocket ucu).",
+  "scripts": {
+    "start": "node server.js",
+    "bootstrap-admin": "node bootstrap-admin.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

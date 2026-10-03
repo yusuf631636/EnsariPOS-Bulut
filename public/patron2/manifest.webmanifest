@@ -1,0 +1,16 @@
+{
+  "name": "Patron Raporu",
+  "short_name": "Patron",
+  "description": "AlfaPOS Bulut - Patron Raporu (bulut ozeti)",
+  "start_url": "/patron2",
+  "scope": "/patron2",
+  "display": "standalone",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/patron2/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/patron2/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/patron2/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

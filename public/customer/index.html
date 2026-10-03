@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Müşteri Paneli — AlfaPOS Bulut</title>
+<link rel="stylesheet" href="/shared.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+  <div id="login" class="center-wrap">
+    <div class="card">
+      <h1 style="margin-bottom:16px">Restoran Paneli</h1>
+      <div class="tabs">
+        <button id="tabLogin" class="active">Giriş yap</button>
+        <button id="tabActivate">İlk kurulum</button>
+      </div>
+
+      <div id="loginErr" class="err" hidden></div>
+      <form id="loginForm">
+        <div class="field"><label>E-posta, işletme adı veya aktivasyon anahtarı</label><input id="username" required></div>
+        <div class="field"><label>Şifre</label><input type="password" id="password" required autocomplete="current-password"></div>
+        <button class="btn primary" type="submit">Giriş yap</button>
+      </form>
+
+      <form id="activateForm" hidden>
+        <p class="muted" style="margin:0 0 12px">Kurulum sırasında size verilen aktivasyon anahtarıyla ilk şifrenizi belirleyin.</p>
+        <div class="field"><label>Aktivasyon anahtarı</label><input id="actKey" required></div>
+        <div class="field"><label>Yeni şifre</label><input type="password" id="actPassword" required></div>
+        <button class="btn primary" type="submit">Şifremi belirle</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="topbar">
+      <h1 id="bizName">Restoran Paneli</h1>
+      <div style="display:flex;gap:8px">
+        <button id="themeToggle" class="btn small" aria-label="Tema değiştir">🌙</button>
+        <button class="btn small" id="logoutBtn">Çıkış</button>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="segbar">
+        <button class="seg active" data-pane="pane-genel">Genel</button>
+        <button class="seg" data-pane="pane-kuryeler">Kuryeler</button>
+        <button class="seg" data-pane="pane-harita">Harita</button>
+        <button class="seg" data-pane="pane-raporlar">Raporlar</button>
+        <button class="seg" data-pane="pane-patron">Patron Raporu</button>
+        <button class="seg" data-pane="pane-menu">QR Menü</button>
+        <button class="seg" data-pane="pane-indirmeler">İndirmeler</button>
+      </div>
+
+      <div id="pane-genel" class="pane active">
+        <div class="card">
+          <h2>Bugün</h2>
+          <div class="card-grid">
+            <div class="stat"><div class="n" id="statDelivered">—</div><div class="l">Teslim edilen</div></div>
+            <div class="stat"><div class="n" id="statRevenue">—</div><div class="l">Tahsilat</div></div>
+            <div class="stat"><div class="n" id="statActiveCouriers">—</div><div class="l">Aktif kurye</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Aktif siparişler <span id="orderCount" class="muted"></span></h2>
+          <div id="ordersList"></div>
+        </div>
+      </div>
+
+      <!-- Patron Raporu'nun kendi restoran bilgisayarina kurulan bir ajani var
+           (C:\ensari) ama bu sayfada ona dair hicbir yerel adres/link
+           gosterilmez - kullanici burada SADECE bulutun ozetledigi veriyi
+           gorur (summaryBox), her yerden/telefondan calisir. -->
+      <div id="pane-patron" class="pane">
+        <div class="card">
+          <h2>Patron Raporu</h2>
+          <p class="muted" style="margin:0 0 12px">
+            Restoran bilgisayarınıza kurduğunuz AlfaPOS Patron, günlük ciro, ödeme türleri,
+            açık masa ve kurye özetini buraya otomatik gönderir — her yerden, telefonunuzdan bile görürsünüz.
+          </p>
+        </div>
+        <div class="card">
+          <h2>Fiyat Güncelle</h2>
+          <p class="muted" style="margin:0 0 12px">Ürün adı yazıp arayın, yeni fiyatı girip gönderin — restoran bilgisayarı açıksa birkaç saniye içinde uygulanır.</p>
+          <input id="patronMenuSearch" placeholder="Ürün ara…" style="margin-bottom:12px">
+          <div id="patronMenuResults"><p class="muted">Aramak için yazmaya başlayın.</p></div>
+        </div>
+        <div id="summaryBox"><p class="muted">Yükleniyor…</p></div>
+
+        <!-- "Saatlik Dagilim" karti (renderSnapshot icinde, yukarida) SADECE
+             bugunun canli goruntusu - tarih/saat araligi secip GECMISE donuk
+             sorgu icin bu ayri kart, restoran bilgisayarindan CANLI istek
+             atar (Fiyat Guncelle ile ayni kuyruklama deseni). -->
+        <div class="card">
+          <h2>Saat Aralığı Sorgula</h2>
+          <p class="muted" style="margin:0 0 12px">Belirli bir tarih aralığında, sadece belirli bir saatte olan satışları görün (örn. "son bir hafta saat 01:00'de olanlar"). Restoran bilgisayarı açık olmalı.</p>
+          <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:10px">
+            <input type="date" id="hourlyStart" style="width:auto">
+            <span class="muted">—</span>
+            <input type="date" id="hourlyEnd" style="width:auto">
+            <select id="hourlyHourStart" style="width:auto"></select>
+            <span class="muted">—</span>
+            <select id="hourlyHourEnd" style="width:auto"></select>
+            <button class="btn primary small" id="hourlyQueryBtn">Sorgula</button>
+          </div>
+          <div id="hourlyQueryResult"></div>
+        </div>
+
+        <div class="card">
+          <div class="row" style="margin-bottom:14px">
+            <h2 style="margin:0">Geçmiş Raporlar</h2>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="date" id="patronStart" style="width:auto">
+              <span class="muted">—</span>
+              <input type="date" id="patronEnd" style="width:auto">
+            </div>
+          </div>
+          <p class="muted" style="margin:0 0 12px">Bu tablo sadece bugünden itibaren birikir; geçmişe dönük veri (bu özellik eklenmeden önceki günler) yoktur.</p>
+          <div id="patronReportGrid"></div>
+        </div>
+      </div>
+
+      <div id="pane-kuryeler" class="pane">
+        <div class="card">
+          <h2>Hangi kuryede paket var</h2>
+          <div id="courierStatusGrid" class="card-grid"></div>
+        </div>
+        <div class="card">
+          <h2>Kuryeler</h2>
+          <p class="muted" style="margin:0 0 12px">Telefon numaraları sadece bu panelde tutulur.</p>
+          <div id="courierList"></div>
+        </div>
+      </div>
+
+      <div id="pane-harita" class="pane">
+        <div class="card">
+          <h2>Canlı kurye konumları</h2>
+          <p class="muted" style="margin:0 0 12px">Kurye, telefonunda konum paylaşımına izin verdiyse burada görünür.</p>
+          <div id="map" style="height:360px;border-radius:12px;overflow:hidden"></div>
+          <div id="locationList" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <div id="pane-raporlar" class="pane">
+        <div class="card">
+          <div class="row" style="margin-bottom:14px">
+            <h2 style="margin:0">Teslimat Raporu</h2>
+            <input type="date" id="reportDate" style="width:auto">
+          </div>
+          <div id="reportGrid" class="card-grid"></div>
+        </div>
+      </div>
+
+      <!-- QR Menü AYRI bir uygulamadir (kendi adresi, kendi girisi, kendi
+           veritabani, bkz. C:\qrmenu). Bu panele gomulmez - sadece yeni
+           sekmede acilir. Menu/siparis verisi restoran bilgisayarindaki
+           hafif ajan (QRMenuAjanSetup.exe) ile bulut arasinda tasinir. -->
+      <div id="pane-menu" class="pane">
+        <div class="card">
+          <h2>QR Menü</h2>
+          <p class="muted" style="margin:0 0 12px">
+            Masalarınıza koyacağınız QR kodu okutan müşteriler menünüzü telefonlarından görür.
+            Menünüz SambaPOS'tan otomatik gelir; fiyatları buradan güncelleyebilir, ürünlere fotoğraf
+            ekleyebilir, menünün rengini ve düzenini seçebilirsiniz.
+          </p>
+          <p class="muted" style="margin:0 0 14px">
+            QR Menü ayrı bir uygulamadır ve kendi girişi vardır: aktivasyon anahtarınızla girip
+            ilk seferde QR Menü'ye özel bir şifre belirlersiniz.
+          </p>
+          <a class="btn primary" href="/qrmenu/" target="_blank" rel="noopener">QR Menü panelini aç</a>
+        </div>
+      </div>
+
+      <!-- Uygulamalar, APK'lar ve panel linkleri - liste /indirmeler.js'te (tum paneller ortak) -->
+      <div id="pane-indirmeler" class="pane">
+        <div id="indirmelerBox" data-mode="customer"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/snapshot.js"></script>
+  <script src="/indirmeler.js"></script>
+  <script src="/customer/app.js"></script>
+</body>
+</html>

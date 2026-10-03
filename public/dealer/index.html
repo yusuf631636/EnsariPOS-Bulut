@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bayi Paneli — AlfaPOS Bulut</title>
+<link rel="stylesheet" href="/shared.css">
+</head>
+<body>
+  <div id="login" class="center-wrap">
+    <div class="card">
+      <h1 style="margin-bottom:16px">Bayi Paneli</h1>
+      <div id="loginErr" class="err" hidden></div>
+      <form id="loginForm">
+        <div class="field"><label>E-posta</label><input type="email" id="email" required autocomplete="username"></div>
+        <div class="field"><label>Şifre</label><input type="password" id="password" required autocomplete="current-password"></div>
+        <button class="btn primary" type="submit">Giriş yap</button>
+      </form>
+      <button class="btn" id="forgotBtn" style="margin-top:10px">Şifremi unuttum</button>
+
+      <form id="forgotForm" hidden style="margin-top:10px">
+        <p class="muted" style="margin:0 0 10px">E-postanızı girin, kayıtlı telefonunuza SMS ile yeni bir şifre gönderilsin.</p>
+        <div class="field"><input type="email" id="forgotEmail" placeholder="E-posta" required></div>
+        <button class="btn primary" type="submit">SMS ile şifre gönder</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="topbar">
+      <h1>Bayi Paneli</h1>
+      <button class="btn small" id="logoutBtn">Çıkış</button>
+    </div>
+    <div class="wrap">
+      <div class="card">
+        <h2>Yeni Restoran (Lisans) Ekle</h2>
+        <p id="quotaInfo" class="muted" style="margin:0 0 12px"></p>
+        <form id="customerForm">
+          <div class="field"><label>İşletme adı</label><input id="customerName" required></div>
+          <div class="field"><label>E-posta (opsiyonel)</label><input type="email" id="customerEmail"></div>
+          <div class="field"><label>Telefon (opsiyonel)</label><input type="tel" id="customerPhone"></div>
+          <div class="field">
+            <label>Ürünler</label>
+            <div class="rows">
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>🛵 Kurye Bulut <span class="muted">(kurye takip)</span></span>
+                <span><input type="checkbox" id="prodKurye" checked style="width:auto"> <b id="priceKurye">$50</b></span>
+              </label>
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>📊 Patron Raporu <span class="muted">(satış raporu)</span></span>
+                <span><input type="checkbox" id="prodPatron" checked style="width:auto"> <b id="pricePatron">$50</b></span>
+              </label>
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>🍽️ QR Menü <span class="muted">(opsiyonel)</span></span>
+                <input type="checkbox" id="prodQrmenu" style="width:auto">
+              </label>
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>⚡ Gelişmiş Kurye <span class="muted">(opsiyonel)</span></span>
+                <input type="checkbox" id="prodGelismisKurye" style="width:auto">
+              </label>
+            </div>
+          </div>
+          <div class="row" style="margin:12px 0"><span class="muted">Toplam</span><b id="priceTotal" style="font-size:17px">$100</b></div>
+          <button class="btn primary" type="submit">Restoran oluştur</button>
+        </form>
+        <div id="activationResult" hidden style="margin-top:12px"></div>
+      </div>
+
+      <div class="card">
+        <h2>Restoranlarım</h2>
+        <div id="restGrid" class="rest-grid"></div>
+      </div>
+      <div id="summaryBox" hidden class="card"></div>
+
+      <div class="card">
+        <h2>İşletme Bilgilerim</h2>
+        <p class="muted" style="margin:0 0 12px">Bu bilgiler sadece hesabınızla ilgilidir.</p>
+        <form id="profileForm">
+          <div class="field"><label>Bayi / İşletme adı</label><input id="profileName" required></div>
+          <div class="field"><label>Telefon</label><input type="tel" id="profilePhone"></div>
+          <div class="field"><label>Web sitesi</label><input id="profileWebsite" placeholder="ornek.com"></div>
+          <button class="btn primary" type="submit">Kaydet</button>
+          <span id="profileMsg" class="inline-msg"></span>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Şifremi Değiştir</h2>
+        <form id="changePasswordForm">
+          <div class="field"><label>Mevcut şifre</label><input type="password" id="currentPassword" required autocomplete="current-password"></div>
+          <div class="field"><label>Yeni şifre</label><input type="password" id="newPassword" required autocomplete="new-password"></div>
+          <button class="btn primary" type="submit">Şifreyi Değiştir</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Kurulum Dosyaları</h2>
+        <p class="muted" style="margin:0 0 14px">Yeni bir restorana satış yaptığınızda, o restoranın bilgisayarına aşağıdaki dosyalardan gerekeni kurun.</p>
+        <div class="rows" style="margin-bottom:16px">
+          <div class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;border:1px solid var(--s1)">
+            <span><b>🚀 Hepsi Bir Arada (Önerilen)</b><br><span class="muted">Kurye + Patron + QR Menü — tek sihirbaz, tek aktivasyon anahtarı</span></span>
+            <a class="btn small primary" href="https://ornek-alanadi.com/downloads/AlfaPOSBulutSetup.exe" download data-track-download="hepsi">İndir</a>
+          </div>
+        </div>
+        <div class="rows" style="margin-bottom:16px">
+          <div class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px">
+            <span><b>AlfaPOS Kurye Bulut</b><br><span class="muted">Sadece kurye takip için (SambaPOS'a kurulur)</span></span>
+            <a class="btn small primary" href="https://ornek-alanadi.com/downloads/KuryeBulutAjanSetup.exe" download data-track-download="kurye">İndir</a>
+          </div>
+        </div>
+        <div class="rows" style="margin-bottom:16px">
+          <div class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px">
+            <span><b>AlfaPOS Patron</b><br><span class="muted">Satış raporu için (SambaPOS'a kurulur)</span></span>
+            <a class="btn small primary" href="https://ornek-alanadi.com/downloads/PatronRaporuSetup.exe" download data-track-download="patron">İndir</a>
+          </div>
+        </div>
+        <div class="card" style="background:var(--surface-2);margin:16px 0">
+          <h2 style="margin-top:0">Güncel Panel Linkleri (müşteriye verin)</h2>
+          <p class="muted" style="margin:0 0 8px">Hepsi <b>aynı hesap/şifre</b> ile çalışır — sadece hangi bölümü gösterdiği farklıdır.</p>
+          <ul style="margin:0;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:2">
+            <li>Kurye yönetimi: <a href="https://kuryebulut.ornek-alanadi.com" target="_blank">kuryebulut.ornek-alanadi.com</a></li>
+            <li>Patron / satış özeti: <a href="https://patron2.ornek-alanadi.com" target="_blank">patron2.ornek-alanadi.com</a></li>
+            <li>Tam panel (hepsi bir arada): <a href="https://app.ornek-alanadi.com/customer" target="_blank">app.ornek-alanadi.com/customer</a></li>
+            <li>QR Menü (ayrı giriş): <a href="https://app.ornek-alanadi.com/qrmenu/" target="_blank">app.ornek-alanadi.com/qrmenu</a></li>
+          </ul>
+        </div>
+
+        <h2 style="margin-top:6px">Nasıl Kurulur — Hepsi Bir Arada (Önerilen)</h2>
+        <p class="muted" style="margin:0 0 10px">Tek dosya, tek sihirbaz — Kurye, Patron ve QR Menü aynı anda kurulur.</p>
+        <ol style="margin:0;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:1.9">
+          <li>Yukarıdan <b>"Hepsi Bir Arada"</b> dosyasını indirin, restoranın SambaPOS çalıştığı bilgisayarına götürün/gönderin.</li>
+          <li>Dosyayı o bilgisayarda <b>yönetici olarak</b> çalıştırın.</li>
+          <li>Sihirbaz SQL Server bilgilerini ve <b>tek bir aktivasyon anahtarını</b> soracak — yukarıdaki "Restoranlarım" tablosundaki anahtarı girin.</li>
+          <li>Kurulum otomatik tamamlanır, üç panel de (Kurye/Patron/QR Menü) sırayla açılır.</li>
+          <li>Restoran sahibine yukarıdaki güncel linkleri verin — ilk girişte kendi şifresini belirler.</li>
+        </ol>
+
+        <h2 style="margin-top:20px">Nasıl Kurulur — Sadece AlfaPOS Kurye Bulut</h2>
+        <ol style="margin:0;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:1.9">
+          <li>Yukarıdan ilgili kurulum dosyasını indirin, restoranın SambaPOS çalıştığı bilgisayarına götürün/gönderin.</li>
+          <li>Dosyayı o bilgisayarda <b>yönetici olarak</b> çalıştırın.</li>
+          <li>Sihirbaz SQL Server bilgilerini soracak: sunucu adresi (genelde <code>localhost</code>), veritabanı adı (genelde <code>SAMBAPOS5</code>), SQL kullanıcı adı/şifresi (SambaPOS kurulumunda belirlenen <code>sa</code> şifresi).</li>
+          <li>En sonda <b>aktivasyon anahtarını</b> soracak — yukarıdaki "Restoranlarım" tablosunda o restoranın satırında yazan anahtarı girin.</li>
+          <li>Kurulum otomatik tamamlanır, birkaç saniye içinde tablodaki "Bağlantı" sütununda o restoran "Bağlı" görünmeye başlar.</li>
+          <li>Restoran sahibine şu linki verin: <a href="https://app.ornek-alanadi.com/customer" target="_blank">app.ornek-alanadi.com/customer</a> — "İlk kurulum" sekmesinden aktivasyon anahtarıyla kendi şifresini belirler.</li>
+        </ol>
+
+        <h2 style="margin-top:20px">Nasıl Kurulur — AlfaPOS Patron</h2>
+        <p class="muted" style="margin:0 0 10px">Kurye Bulut'tan farklı olarak sihirbaz <b>iki sayfa</b> sorar; ikinci sayfa (bulut anahtarı) sayesinde restoran sahibi kendi bilgisayarına hiç dokunmadan, telefonundan bile, satış raporlarını bulut müşteri panelinden görebilir.</p>
+        <ol style="margin:0;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:1.9">
+          <li>Yukarıdan <b>AlfaPOS Patron</b> dosyasını indirin, restoranın SambaPOS çalıştığı bilgisayarına götürün/gönderin.</li>
+          <li>Dosyayı o bilgisayarda <b>yönetici olarak</b> çalıştırın.</li>
+          <li>"SQL Server Veritabanı Ayarları" sayfasında sunucu adresi, veritabanı adı ve (varsa) SQL kullanıcı adı/şifresini girin — boş bırakılırsa Windows kimlik doğrulaması kullanılır.</li>
+          <li>"Ensari POS Bulut (opsiyonel)" sayfasında <b>bulut aktivasyon anahtarını</b> girin — Kurye Bulut'ta kullandığınız <b>aynı</b> anahtar (yukarıdaki "Restoranlarım" tablosunda yazıyor). Bu alanı boş geçerse rapor sadece o bilgisayarda kalır, buluta hiç gitmez.</li>
+          <li>Kurulum tamamlanır; bir pencere birkaç saniyeliğine yerel erişim linkini gösterip kapanır — bu normaldir, restoran sahibinin buna dokunmasına gerek yok.</li>
+          <li>Restoran sahibi artık <a href="https://app.ornek-alanadi.com/customer" target="_blank">app.ornek-alanadi.com/customer</a> panelindeki <b>"Patron Raporu"</b> sekmesinden ciro, en çok satan ürünler, departman/personel bazlı satış ve geçmiş günlük raporları görebilir — <b>tünel, DuckDNS veya Tailscale kurmasına gerek yoktur</b>, onlar sadece kendi özel yerel paneline (aynı ağın dışından) erişmek isteyenler için opsiyonel ileri seviye bir özelliktir.</li>
+        </ol>
+      </div>
+
+      <!-- Tum uygulamalar, APK'lar ve panel linkleri - liste /indirmeler.js'te (tum paneller ortak) -->
+      <div id="indirmelerBox" data-mode="dealer"></div>
+    </div>
+  </div>
+
+  <script src="/snapshot.js"></script>
+  <script src="/indirmeler.js"></script>
+  <script src="/dealer/app.js"></script>
+</body>
+</html>

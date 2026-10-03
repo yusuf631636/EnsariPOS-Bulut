@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yönetim Paneli — AlfaPOS Bulut</title>
+<link rel="stylesheet" href="/shared.css">
+<link rel="manifest" href="/admin/manifest.webmanifest">
+<link rel="icon" href="/admin/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/admin/icons/icon-192.png">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Yönetim">
+</head>
+<body>
+  <div id="login" class="center-wrap">
+    <div class="card">
+      <h1 style="margin-bottom:16px">Yönetim Paneli</h1>
+      <div id="loginErr" class="err" hidden></div>
+      <form id="loginForm">
+        <div class="field"><label>E-posta</label><input type="email" id="email" required autocomplete="username"></div>
+        <div class="field"><label>Şifre</label><input type="password" id="password" required autocomplete="current-password"></div>
+        <button class="btn primary" type="submit">Giriş yap</button>
+      </form>
+      <button class="btn" id="forgotBtn" style="margin-top:10px">Şifremi unuttum</button>
+
+      <form id="forgotForm" hidden style="margin-top:10px">
+        <p class="muted" style="margin:0 0 10px">E-postanızı girin, kayıtlı telefonunuza SMS ile yeni bir şifre gönderilsin.</p>
+        <div class="field"><input type="email" id="forgotEmail" placeholder="E-posta" required></div>
+        <button class="btn primary" type="submit">SMS ile şifre gönder</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="topbar">
+      <h1>Yönetim Paneli</h1>
+      <button class="btn small" id="logoutBtn">Çıkış</button>
+    </div>
+    <div class="wrap">
+      <div id="msg"></div>
+
+      <div class="segbar">
+        <button class="seg active" data-pane="pane-musteriler">Müşteriler</button>
+        <button class="seg" data-pane="pane-bayiler">Bayiler</button>
+        <button class="seg" data-pane="pane-lisans">Lisans</button>
+        <button class="seg" data-pane="pane-genel">Genel</button>
+        <button class="seg" data-pane="pane-indirmeler">İndirmeler</button>
+      </div>
+
+      <div id="pane-musteriler" class="pane active">
+        <div class="card">
+          <h2>Restoranlar <span class="muted" id="restTotalCount"></span> <span class="muted" style="font-weight:400">(bayiye göre gruplu — isme tıklayınca detay açılır)</span></h2>
+          <div id="restGroups"></div>
+        </div>
+
+        <div class="card">
+          <h2>Son Silinenler <span class="muted" style="font-weight:400">(sadece askıya alınmış müşteriler silinebilir, veri kaybolmaz)</span></h2>
+          <table id="deletedTable"><thead><tr><th>İşletme</th><th>Bayi</th><th>Silinme tarihi</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <div id="pane-lisans" class="pane">
+        <div class="card">
+          <h2>Lisans Ver / Yenile</h2>
+
+          <div class="segbar" style="margin-bottom:18px">
+            <button type="button" class="seg active" id="licModeNewBtn">🆕 Yeni Müşteri</button>
+            <button type="button" class="seg" id="licModeExistingBtn">✏️ Mevcut Müşteri</button>
+          </div>
+
+          <div id="licNewFields" class="field"><label>Bayi</label><select id="licDealer" required></select></div>
+          <div id="licExistingFields" class="field" hidden><label>Müşteri</label><select id="licExistingCustomer"></select></div>
+          <div id="licInfo" class="muted" style="margin-bottom:12px"></div>
+
+          <div class="field"><label>İşletme adı</label><input id="licName" required></div>
+          <div class="field"><label>E-posta (opsiyonel — girişte işletme adı yerine kullanılabilir)</label><input type="email" id="licEmail"></div>
+          <div class="field"><label>Telefon (opsiyonel — SMS için)</label><input type="tel" id="licPhone"></div>
+          <div id="licPasswordField" class="field"><label>Şifre (opsiyonel — doldurursanız müşteri aktivasyon anahtarına gerek kalmadan doğrudan işletme adı/e-posta + bu şifreyle giriş yapabilir)</label><input type="text" id="licPassword" placeholder="Boş = müşteri kendi belirler"></div>
+
+          <div class="field">
+            <label>Ürünler</label>
+            <div class="rows">
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>🛵 Kurye Bulut <span class="muted">($50)</span></span>
+                <input type="checkbox" id="licProdKurye" checked style="width:auto">
+              </label>
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>📊 Patron Raporu <span class="muted">($50)</span></span>
+                <input type="checkbox" id="licProdPatron" checked style="width:auto">
+              </label>
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>🍽️ QR Menü <span class="muted">(opsiyonel)</span></span>
+                <input type="checkbox" id="licProdQrmenu" style="width:auto">
+              </label>
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>⚡ Gelişmiş Kurye <span class="muted">(opsiyonel)</span></span>
+                <input type="checkbox" id="licProdGelismisKurye" style="width:auto">
+              </label>
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>🚀 Ultra Gelişmiş Kurye <span class="muted">(opsiyonel)</span></span>
+                <input type="checkbox" id="licProdUltraPaketci" style="width:auto">
+              </label>
+              <label class="row" style="background:var(--surface-2);border-radius:10px;padding:10px 12px;cursor:pointer">
+                <span>🧑‍🍳 Garson Sistemi <span class="muted">(opsiyonel)</span></span>
+                <input type="checkbox" id="licProdGarson" style="width:auto">
+              </label>
+            </div>
+          </div>
+          <div class="field"><label>Lisans bitiş tarihi (boş = süresiz)</label><input type="date" id="licDate"></div>
+          <button class="btn primary" id="licSaveBtn">Kaydet</button>
+          <div id="activationResult" hidden style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <div id="pane-bayiler" class="pane">
+        <div class="card">
+          <h2>Yeni Bayi Ekle</h2>
+          <form id="dealerForm">
+            <div class="field"><label>Bayi adı</label><input id="dealerName" required></div>
+            <div class="field"><label>E-posta</label><input type="email" id="dealerEmail" required></div>
+            <div class="field"><label>Şifre</label><input type="password" id="dealerPassword" required></div>
+            <div class="field"><label>Komisyon oranı (%)</label><input type="number" id="dealerCommission" value="0" step="0.1"></div>
+            <div class="field"><label>Lisans kotası (boş = sınırsız)</label><input type="number" id="dealerQuota" min="0" step="1"></div>
+            <button class="btn primary" type="submit">Bayi oluştur</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Bayiler <span class="muted" style="font-weight:400">(kartına tıklayınca detay/müşteri listesi açılır)</span></h2>
+          <div id="dealerCards" class="card-grid"></div>
+        </div>
+        <div id="dealerDetail" hidden class="card"></div>
+      </div>
+
+      <div id="pane-genel" class="pane">
+        <div class="card">
+          <h2>İndirme İstatistikleri</h2>
+          <div id="downloadStats" class="muted">Yükleniyor…</div>
+        </div>
+      </div>
+
+      <!-- Uygulamalar, APK'lar ve tum panel linkleri - liste /indirmeler.js'te (tum paneller ortak) -->
+      <div id="pane-indirmeler" class="pane">
+        <div id="indirmelerBox" data-mode="admin"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/indirmeler.js"></script>
+  <script src="/admin/app.js"></script>
+  <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('/admin/sw.js').catch(() => {})); }</script>
+</body>
+</html>

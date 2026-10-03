@@ -1,0 +1,91 @@
+Ensari POS Bulut - VPS'e Canlıya Alma Rehberi
+================================================
+
+Bu klasördeki her şey hazır (kod, servis tanımı, ters proxy ayarı). Sizin
+yapmanız gereken tek şey bir VPS kiralayıp aşağıdaki adımları uygulamak
+(veya bana SSH erişimi verip adımları benim yapmamı istemek).
+
+ADIM 1 - VPS kiralayın
+-----------------------
+Önerilen: Hetzner Cloud (CX22, ~5 EUR/ay) veya DigitalOcean/Contabo eşdeğeri.
+İşletim sistemi: Ubuntu 22.04 veya 24.04 LTS (x64).
+En düşük plan yeterlidir (2 vCPU / 4GB RAM fazlasıyla yeter).
+Kiralama sonunda size bir IP adresi ve root şifresi/SSH anahtarı verilir.
+
+ADIM 2 - Domain'i sunucuya yönlendirin
+----------------------------------------
+Cloudflare panelinde (dash.cloudflare.com) ornek-alanadi.com'un DNS ayarlarına girin:
+  - Yeni bir A kaydı ekleyin: isim "app", değer = VPS'in IP adresi.
+  - Turuncu bulut (Proxy) açık kalabilir (otomatik HTTPS + DDoS koruması sağlar).
+Birkaç dakika içinde app.ornek-alanadi.com o sunucuya işaret eder.
+
+ADIM 3 - Bu klasörü sunucuya yükleyin
+----------------------------------------
+Kendi bilgisayarınızda (Windows) bir terminalde (PowerShell), bu C:\toplu
+klasörünü sunucuya kopyalayın. Örnek (IP'yi kendi sunucunuzla değiştirin):
+
+  scp -r "C:\toplu" root@SUNUCU_IP:/root/ensaripos-cloud-src
+
+(scp yoksa WinSCP gibi bir program da kullanılabilir - sürükle bırak.)
+
+ADIM 4 - Kurulum script'ini çalıştırın
+------------------------------------------
+Sunucuya SSH ile bağlanın:
+
+  ssh root@SUNUCU_IP
+
+Sonra:
+
+  cd /root/ensaripos-cloud-src
+  chmod +x deploy/setup-vps.sh
+  sudo bash deploy/setup-vps.sh
+
+Bu tek komut şunları otomatik yapar:
+  - Node.js LTS kurar
+  - Uygulamayı /opt/ensaripos-cloud altına kopyalar (kalıcı konum)
+  - npm bağımlılıklarını kurar
+  - Uygulamayı systemd servisi olarak kurar (sunucu yeniden başlasa bile
+    otomatik çalışır, çökerse otomatik yeniden başlar)
+  - Caddy'yi kurar ve app.ornek-alanadi.com için OTOMATİK HTTPS (ücretsiz SSL
+    sertifikası) sağlayan ters proxy olarak ayarlar
+
+ADIM 5 - İlk yönetici hesabını oluşturun
+--------------------------------------------
+Script'in sonunda ekranda bir komut önerisi çıkacak, onu çalıştırın:
+
+  cd /opt/ensaripos-cloud
+  sudo -u ensaripos node bootstrap-admin.js admin@ornek-alanadi.com KENDI_SIFRENIZ
+
+Bu, https://app.ornek-alanadi.com/admin adresinden gireceğiniz ilk hesabı oluşturur.
+
+ADIM 6 - Doğrulayın
+----------------------
+Tarayıcıda açın: https://app.ornek-alanadi.com/admin
+E-posta + yukarıda belirlediğiniz şifreyle giriş yapın.
+Bir bayi + bir test restoranı oluşturup aktivasyon anahtarını alın,
+C:\ensari\config.json'a "cloudActivationKey" olarak girip test edin.
+
+
+SONRADAN GÜNCELLEME YAPMAK İSTERSENİZ (kod değiştiğinde)
+============================================================
+Ben kodu C:\toplu'da güncelledikten sonra, sunucuda şunu çalıştırmanız yeterli:
+
+  cd /root/ensaripos-cloud-src   (güncel dosyaları tekrar yükleyin - ADIM 3)
+  sudo bash deploy/setup-vps.sh   (script zaten var olanı guncelleyip yeniden baslatir)
+
+veya sadece kod dosyalarını /opt/ensaripos-cloud'a kopyalayıp:
+  sudo systemctl restart ensaripos-cloud
+
+
+SORUN GİDERME
+================
+Servis çalışıyor mu:     systemctl status ensaripos-cloud
+Canlı loglar:             journalctl -u ensaripos-cloud -f
+Caddy (HTTPS) durumu:     systemctl status caddy
+Caddy logları:            journalctl -u caddy -f
+
+
+NOT: Bu sunucu SADECE bulut panelini barındırır - hiçbir restoranın
+SambaPOS/SQL Server'ına doğrudan bağlanmaz. Restoranlar kendi verilerini
+kendi bilgisayarlarından bu sunucuya (HTTPS ile) İTER (push) - bu yüzden
+sunucuda güvenlik duvarında SQL portu açmaya hiç gerek yoktur.

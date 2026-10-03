@@ -1,0 +1,182 @@
+﻿*** 29.09.2026 GÜNCELLEME: Tüm projeler C:\Projeler altına taşındı. Bu dosyadaki eski yollar
+    (C:\EnsariPOS-Sunucu, C:\toplu, C:\gelismis-kurye-sistemi ...) artık geçersiz.
+    Bu klasör = C:\Projeler\1-Bulut. Güncel harita: C:\Projeler\NEREDE-NE-VAR.txt ***
+
+ENSARI POS SİSTEMLERİ — NE NEREDE, NASIL ÇALIŞIYOR
+======================================================
+(Bu belge dört ayrı projeyi ve aralarındaki ilişkiyi anlatır.)
+
+>>> ÖNCE BU BELGEYİ BAŞTAN SONA OKUYUN, HERHANGİ BİR .bat DOSYASINI
+>>> ÇALIŞTIRMADAN ÖNCE. Hangi dosyanın ne işe yaradığını bilmeden
+>>> çalıştırmak karışıklığa yol açar. Okuduktan sonra ilgili
+>>> "baslat.bat" dosyasına geçebilirsiniz.
+
+
+GENEL TABLO
+-------------
+1) C:\ensari           -> Ensari POS Patron        (SİZİN restoranınız - satış raporu)
+2) C:\kurye takip      -> AlfaPOS Kurye Takip      (SİZİN restoranınız - kurye takibi)
+3) C:\EnsariPOS-Sunucu -> Ensari POS Bulut          (SATILACAK ÜRÜN - merkezi SaaS paneli)
+4) C:\kurye-bulut-ajan -> Kurye Bulut Ajanı         (SATILACAK ÜRÜN - müşteriye kurulan parça)
+
+İlk ikisi (1-2) SADECE sizin kendi restoranınız için, kendi bilgisayarınızda
+çalışıyor ve zaten canlı: patron.ornek-alanadi.com / kurye.ornek-alanadi.com
+
+Son ikisi (3-4) yeni müşterilere SATACAĞINIZ, çok kiracılı (multi-tenant)
+sistem. 3 numara (Ensari POS Bulut) sunucuda/bulutta durur, 4 numara
+(Kurye Bulut Ajanı) her yeni müşterinin kendi bilgisayarına kurulur.
+
+
+===========================================================
+1) C:\ensari — ENSARI POS PATRON  (kendi restoranınız)
+===========================================================
+NE İŞE YARAR
+  Cep telefonundan/bilgisayardan restoranın günlük ciro, satış, açık
+  masa/paket, kasa özetini gösterir.
+
+NASIL ÇALIŞIYOR
+  - Node.js sunucusu (server.js), SambaPOS'un SQL Server veritabanını
+    okur (sqlcmd ile).
+  - Şu an "EnsariPatron" adında gerçek bir Windows servisi olarak
+    çalışıyor - bilgisayar yeniden başlasa bile otomatik ayağa kalkar.
+  - Dışarıdan erişim: https://patron.ornek-alanadi.com (Cloudflare Named
+    Tunnel üzerinden, "EnsrapoTunnel" servisi).
+
+NEREDE ÇALIŞIYOR
+  Bu bilgisayarda (sizin PC'niz), gerçek Windows servisi olarak.
+  Elle başlatmanıza GEREK YOK - zaten sürekli çalışıyor.
+
+KURULUM DOSYASI (başka bir PC'ye kurmak isterseniz)
+  C:\ensari\dist\PatronRaporuSetup.exe
+
+
+===========================================================
+2) C:\kurye takip — ALFAPOS KURYE TAKİP  (kendi restoranınız)
+===========================================================
+NE İŞE YARAR
+  Kuryelerinizin PIN ile giriş yapıp kendilerine atanmış siparişleri
+  görmesi, müşteriyi araması, yol tarifi alması, "Teslim Edildi"
+  demesi. Yönetici ekranından kurye telefonları, canlı konum haritası,
+  günlük teslimat raporu.
+
+NASIL ÇALIŞIYOR
+  - Node.js sunucusu (server.js), aynı şekilde SambaPOS'u okur/yazar.
+  - "AlfaPOSKuryeTakip" adında gerçek Windows servisi - otomatik çalışır.
+  - Dışarıdan erişim: https://kurye.ornek-alanadi.com/courier (kurye) ve
+    https://kurye.ornek-alanadi.com/admin (siz).
+
+NEREDE ÇALIŞIYOR
+  Bu bilgisayarda, gerçek Windows servisi olarak. Elle başlatmaya
+  GEREK YOK.
+
+KURULUM DOSYASI (başka bir PC'ye kurmak isterseniz - ama dikkat, aşağıya
+bakın, YENİ MÜŞTERİLER İÇİN BUNU DEĞİL, 4 numaralı ajanı kullanacaksınız)
+  C:\kurye takip\dist\AlfaPOSKuryeTakipSetup.exe
+
+
+===========================================================
+3) C:\EnsariPOS-Sunucu — ENSARİ POS BULUT  (satılacak ürün - merkezi panel, 21.09.2026'da C:\toplu'dan buraya taşındı, ürün bazlı alt klasörlere ayrıldı)
+===========================================================
+NE İŞE YARAR
+  Bu, SATACAĞINIZ ürünün MERKEZİ BEYNİ. Dört farklı ekranı var:
+    - /admin    -> SİZ: tüm bayileri ve restoranları görür, yeni bayi/
+                   müşteri eklersiniz, aboneliği askıya alırsınız.
+    - /dealer   -> BAYİLERİNİZ: sadece kendilerine atanmış restoranları
+                   görür.
+    - /customer -> MÜŞTERİ (restoran sahibi): kendi satış özetini VE
+                   kendi kuryelerini (PIN, telefon, rapor) yönetir.
+    - /courier  -> MÜŞTERİNİN KURYESİ: işletme adı + PIN ile girer,
+                   kendine atanmış siparişleri görür, teslim eder.
+
+NASIL ÇALIŞIYOR
+  - Node.js sunucusu (server.js) + SQLite veritabanı (data\cloud.db).
+  - Müşterinin bilgisayarındaki "Kurye Bulut Ajanı" (4. madde) buraya
+    WebSocket ile bağlanır, kurye+sipariş verisini gönderir.
+  - Kurye "Teslim Edildi" dediğinde, bu sunucu ajana geri komut yollar;
+    gerçek SQL yazımını (adisyonu kapatma) HER ZAMAN o müşterinin kendi
+    bilgisayarındaki ajan yapar - bu sunucu asla doğrudan bir
+    müşterinin SQL Server'ına bağlanmaz.
+
+NEREDE ÇALIŞMASI GEREKİYOR
+  Şu an SADECE test amaçlı, sizin bilgisayarınızda, gerekince elle
+  açıyorsunuz (aşağıdaki "baslat.bat" ile). KALICI olması için bir VPS
+  (bulut sunucu) kiralayıp oraya taşımanız gerekiyor - adımlar:
+    C:\EnsariPOS-Sunucu\deploy\NASIL-YAPILACAK.txt
+
+YEREL TEST İÇİN
+  C:\EnsariPOS-Sunucu\baslat.bat -> çift tıklayın. İlk seferde bir yönetici
+  e-postası/şifresi soracak, sonra http://localhost:8888 adresinde
+  paneli açacak. Kapatmak için pencereyi kapatın.
+
+
+===========================================================
+4) C:\kurye-bulut-ajan — KURYE BULUT AJANI  (satılacak ürün - müşteriye kurulan parça)
+===========================================================
+NE İŞE YARAR
+  Her YENİ müşterinin (sattığınız restoranın) bilgisayarına kurulan
+  TEK şey budur. Web sunucusu DEĞİLDİR, tünele hiç ihtiyacı yoktur -
+  sadece o restoranın SambaPOS'unu okuyup Ensari POS Bulut'a (3. madde)
+  bağlanan, arka planda sessizce çalışan küçük bir programdır.
+
+NASIL ÇALIŞIYOR
+  - agent.js, restoranın SQL Server'ını okur (kurye listesi + PIN'ler +
+    aktif siparişler), 6 saniyede bir buluta gönderir.
+  - Buluttan "bu sipariş teslim edildi" komutu gelirse, o an SQL'e
+    yazıp adisyonu kapatır.
+  - "KuryeBulutAjan" adında bir Windows servisi olarak kurulur - o
+    müşterinin bilgisayarı yeniden başlasa bile otomatik çalışır.
+
+YENİ BİR MÜŞTERİYE NASIL KURULUR (adım adım)
+  1. Ensari POS Bulut yönetim panelinden (/admin) o müşteri için bir
+     bayi + restoran kaydı oluşturun, aktivasyon anahtarını alın.
+  2. Müşterinin bilgisayarına şu dosyayı gönderin/kurun:
+     C:\kurye-bulut-ajan\dist\KuryeBulutAjanSetup.exe
+  3. Kurulum sihirbazı SQL Server bilgilerini VE o aktivasyon anahtarını
+     soracak - müşterinin kendi SambaPOS bilgilerini ve 1. adımda
+     aldığınız anahtarı girersiniz.
+  4. Kurulum bitince ajan otomatik başlar, birkaç saniye içinde bulut
+     panelinde o restoran "Bağlı" görünür.
+  5. Müşteriye şu linki ve kurye PIN'lerini verin:
+     https://app.ornek-alanadi.com/courier  (VPS kurulduktan sonra)
+     Müşterinin kendisi de https://app.ornek-alanadi.com/customer'dan
+     aktivasyon anahtarıyla ilk şifresini belirler.
+
+YEREL TEST İÇİN (kendi bilgisayarınızda, aynı SambaPOS'a karşı)
+  1. C:\kurye-bulut-ajan\config.example.json dosyasını kopyalayıp
+     "config.json" adıyla kaydedin.
+  2. İçindeki SQL bilgilerini ve aktivasyon anahtarını doldurun.
+  3. C:\kurye-bulut-ajan\baslat.bat dosyasına çift tıklayın.
+
+
+===========================================================
+ÖZET AKIŞ ŞEMASI
+===========================================================
+
+  [SİZİN restoranınız]                 [YENİ MÜŞTERİNİN restoranı]
+  SambaPOS                              SambaPOS
+     |                                     |
+  C:\ensari + C:\kurye takip           C:\kurye-bulut-ajan
+  (Windows servisi, zaten calisiyor)   (Windows servisi, ajan)
+     |                                     |
+  patron/kurye.ornek-alanadi.com                 |  (WebSocket, disa dogru)
+  (dogrudan, Cloudflare Tunnel)             v
+                                    C:\EnsariPOS-Sunucu (Ensari POS Bulut)
+                                    -> VPS'e tasinacak, app.ornek-alanadi.com
+                                       |         |          |
+                                    /admin    /dealer    /customer + /courier
+                                    (SİZ)     (BAYİ)     (MÜŞTERİ + KURYESİ)
+
+
+===========================================================
+ÖNEMLİ HATIRLATMALAR
+===========================================================
+- C:\ensari ve C:\kurye takip'e HİÇBİR ZAMAN dokunmuyoruz, onlar zaten
+  canlı ve stabil - bu belge sadece bilgi amaçlı.
+- C:\EnsariPOS-Sunucu'yu GERÇEKTEN satmaya başlamadan önce bir VPS'e taşımanız
+  lazım (deploy\NASIL-YAPILACAK.txt) - şu an sadece bu bilgisayarda
+  test aşamasında.
+- "Teslim Edildi" işlemi HER ZAMAN müşterinin kendi bilgisayarındaki
+  ajan üzerinden gerçek SQL yazımı yapar - bulut sunucu asla bir
+  müşterinin SQL Server'ına doğrudan bağlanmaz (güvenlik).
+- Masaüstünüzdeki ensaripos-yedek-*.zip dosyaları bu dört projenin
+  tam yedeğidir - bir şey bozulursa/silinirse oradan geri yükleyin.

@@ -1,0 +1,31 @@
+{
+  "server": "DESKTOP-ADI",
+  "database": "SAMBAPOS5",
+  "user": "sa",
+  "password": "DEGISTIR_BURAYA",
+  "options": {
+    "encrypt": false,
+    "trustServerCertificate": true
+  },
+  "activationKey": "BULUT_PANELINDEN_ALDIGINIZ_ANAHTAR",
+  "cloudServerUrl": "https://app.ornek-alanadi.com",
+
+  "_qrMenuUrl_aciklama": "ISTEGE BAGLI. Bu satir YOKSA QR Menü modulu hic calismaz (davranis degismez). QR Menü satin alan musterilerde asagidaki satirin basindaki alt cizgiyi kaldirip kullanin.",
+  "_qrMenuUrl": "https://app.ornek-alanadi.com/qrmenu",
+
+  "_sambaOtomasyon_aciklama": "ISTEGE BAGLI. QR Menü'den gelen siparislerin SambaPOS'a otomatik adisyon olarak dusmesi icin gerekir - bu satirlar YOKSA (veya sambaAutomationUser/sambaAutomationPassword eksikse) siparis modulu pasif kalir, QR Menü sadece goruntuleme modunda calismaya devam eder. SambaPOS'ta Yonet > Kullanicilar > 'Graphql Clients' ekranindan bir istemci (Identifier/Secret) olusturup asagidaki alanlara yazin; kullanici adi/sifre ise o istemciyle eslesen GERCEK bir SambaPOS kullanicisina ait olmali.",
+  "_sambaGraphqlUrl": "http://localhost:9000",
+  "_sambaAutomationUser": "DEGISTIR_BURAYA",
+  "_sambaAutomationPassword": "DEGISTIR_BURAYA",
+  "_sambaAutomationClientId": "DEGISTIR_BURAYA",
+  "_sambaAutomationClientSecret": "DEGISTIR_BURAYA",
+  "_sambaCustomerEntityType": "Müşteriler",
+  "_sambaTableEntityType": "SambaPOS'taki masa varlik tipi adi (Yonet > Varlik Tipleri) - orn. Masalar. QR Menü'deki masa secim kutusu bu tipteki varliklardan doldurulur.",
+  "_sambaDineInTicketType": "MASADA siparisler icin adisyon tipi adi (Yonet > Adisyon Turleri) - orn. Adisyon",
+  "_sambaDineInDepartment": "MASADA siparisler icin departman adi (Yonet > Departmanlar) - orn. Restoran",
+  "_sambaDeliveryTicketType": "PAKET SERVIS siparisleri icin adisyon tipi adi - orn. Paket Servis",
+  "_sambaDeliveryDepartment": "PAKET SERVIS siparisleri icin departman adi - girilmezse sambaDineInDepartment kullanilir",
+  "_sambaPosUser": "Adisyonun 'olusturan kullanici' alaninda gorunecek SambaPOS kullanicisi (bos birakilirsa sambaAutomationUser kullanilir)",
+  "_sambaPosTerminal": "SambaPOS'taki terminal adi (Yonet > Terminaller) - orn. Sunucu",
+  "_sambaKitchenPrintJob": "ISTEGE BAGLI. MASA siparisi acilinca mutfaga otomatik fis yazdirmak icin SambaPOS'taki Yazdirma Gorevi adi (Yonet > Yazdirma Gorevleri) - orn. 'Siparişleri Mutfağa Yazdır'. Bos birakilirsa otomatik yazdirma yapilmaz, adisyon yine de acilir."
+}

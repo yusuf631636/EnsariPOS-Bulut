@@ -1,0 +1,12 @@
+﻿{
+  "name": "kurye-bulut-ajan",
+  "version": "1.5.3",
+  "private": true,
+  "description": "AlfaPOS Bulut - restoran bilgisayarinda calisan kurye senkron ajani (web sunucusu yok, tunel gerekmez).",
+  "scripts": {
+    "start": "node agent.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Patron Raporu — AlfaPOS Bulut</title>
+<link rel="stylesheet" href="/shared.css">
+<link rel="stylesheet" href="/patron2/patron2.css?v=4">
+<link rel="manifest" href="/patron2/manifest.webmanifest">
+<link rel="icon" href="/patron2/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/patron2/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Patron">
+</head>
+<body class="p2">
+  <!-- Patron Raporu paneli v2 (30.09.2026, kullanici istegi: "patronu hem düzenle hemde biraz daha gelişmiş yap").
+       Ayni giris ve ayni backend uclari (/api/customer/*). Onceki surum: 10 sekme + ortak snapshot.js;
+       bu surum 5 sekme (Ozet / Canli / Raporlar / Menu / Diger), kendi cizimi (app.js), dunle/gecen haftayla kiyas
+       (C# ajan 2.1+ 'compare' gonderir; eski ajanlarda kiyaslar gizlenir). snapshot.js'e dokunulmadi
+       (musteri/bayi panelleri onu kullanmaya devam ediyor). -->
+  <div id="login" class="center-wrap">
+    <div class="card">
+      <div style="text-align:center;margin-bottom:14px"><img src="/patron2/icons/icon-192.png" alt="" style="width:76px;height:76px;border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,.35)">
+        <h1 style="margin:10px 0 2px">Patron Raporu</h1><div class="muted" style="font-size:13px">Restoranınız cebinizde — satış, masa, fiyat</div></div>
+      <div class="tabs">
+        <button id="tabLogin" class="active">Giriş yap</button>
+        <button id="tabActivate">İlk kurulum</button>
+      </div>
+      <div id="loginErr" class="err" hidden></div>
+      <form id="loginForm">
+        <div class="field"><label>E-posta, işletme adı veya aktivasyon anahtarı</label><input id="username" required></div>
+        <div class="field"><label>Şifre</label><input type="password" id="password" required autocomplete="current-password"></div>
+        <button class="btn primary" type="submit">Giriş yap</button>
+      </form>
+      <form id="activateForm" hidden>
+        <p class="muted" style="margin:0 0 12px">Kurulum sırasında size verilen aktivasyon anahtarıyla ilk şifrenizi belirleyin.</p>
+        <div class="field"><label>Aktivasyon anahtarı</label><input id="actKey" required></div>
+        <div class="field"><label>Yeni şifre</label><input type="password" id="actPassword" required></div>
+        <button class="btn primary" type="submit">Şifremi belirle</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="p2-top">
+      <div class="brand"><img src="/patron2/icons/icon-192.png" alt="" class="logo"><div style="min-width:0"><h1 id="bizName">Patron Raporu</h1><div class="sub" id="bizSub">&nbsp;</div></div></div>
+      <div class="tools">
+        <span class="live off" id="liveBadge"><i></i><span>bağlanıyor…</span></span>
+        <button class="ic" id="refreshBtn" title="Yenile" aria-label="Yenile">⟳</button>
+        <button class="exit" id="exitBtn" title="Çıkış yap">Çıkış</button>
+      </div>
+    </div>
+    <!-- v4 (02.10.2026): alt sekme menusu kalkti; her sey ana sayfadaki kartlarda, karta basinca icerik acilir -->
+    <div class="dback" id="backBar" hidden><button id="homeBack" aria-label="Ana sayfa">‹</button><b id="backTitle"></b></div>
+    <main>
+      <section class="view on" id="v-ozet"><div id="ozetBox"><p class="empty">Yükleniyor…</p></div></section>
+
+      <section class="view" id="v-canli">
+        <div class="pills" id="canliTabs"></div>
+        <div id="canliBox"></div>
+      </section>
+
+      <section class="view" id="v-rapor">
+        <div id="raporMenu"></div>
+        <div id="raporDetail" hidden>
+        <div class="rtop noprint"><button class="back" id="rBack">‹ <span id="rTitle">Rapor</span></button>
+          <span class="row2"><button class="btng" id="xCsv">⬇ Excel</button><button class="btng" id="xPdf">🖨 PDF</button></span></div>
+        <div class="pills" id="rangePills">
+          <button data-r="today" class="on">Bugün</button><button data-r="yesterday">Dün</button><button data-r="7">7 gün</button>
+          <button data-r="30">30 gün</button><button data-r="month">Bu ay</button><button data-r="custom">Özel</button>
+        </div>
+        <div class="box noprint" id="customBox" hidden>
+          <div class="row2">
+            <label class="fld">Başlangıç<input type="date" id="rStart"></label>
+            <label class="fld">Bitiş<input type="date" id="rEnd"></label>
+            <label class="fld">Saat (isteğe bağlı)<select id="rHs"></select></label>
+            <label class="fld">&nbsp;<select id="rHe"></select></label>
+            <button class="btnp" id="rGo" style="align-self:flex-end">Getir</button>
+          </div>
+          <p class="note">Saat seçerseniz sadece o saatlerdeki satışlar sayılır (ör. son 7 gün 12:00–14:00).</p>
+        </div>
+        <div id="raporBox"></div>
+        </div>
+      </section>
+
+      <section class="view" id="v-menu">
+        <div class="box">
+          <input id="mSearch" placeholder="🔍 Ürün ara…" style="width:100%;margin-bottom:10px">
+          <div class="pills" id="mGroups" style="margin-bottom:6px"></div>
+          <div id="mList"><p class="empty">Yükleniyor…</p></div>
+        </div>
+        <div class="box" id="bulkBox">
+          <h2>Toplu zam / indirim</h2>
+          <div class="row2">
+            <label class="fld">Kategori<select id="bGroup"></select></label>
+            <label class="fld">Yüzde (%)<input id="bPct" type="number" inputmode="decimal" placeholder="ör. 10 ya da -5" step="0.5"></label>
+            <label class="fld">Yuvarla<select id="bRound"><option value="0">Yok (kuruş)</option><option value="0.5">0,50 ₺</option><option value="1">1 ₺</option><option value="5" selected>5 ₺</option><option value="10">10 ₺</option></select></label>
+            <label class="fld">Fiyat türü<select id="bTag"><option value="">Hepsi</option></select></label>
+          </div>
+          <div style="margin-top:10px"><button class="btnp" id="bPreview">Önizle</button></div>
+          <div id="bResult"></div>
+        </div>
+      </section>
+
+      <section class="view" id="v-diger">
+        <div class="cols">
+          <div>
+            <div class="box"><h2>Bildirimler <span class="mut" style="text-transform:none;letter-spacing:0;font-weight:500">iptal · iade · gün başı/sonu</span></h2><div id="ntfBox"></div></div>
+            <div class="box">
+              <h2>Ayarlar</h2>
+              <div class="li"><div>Tema</div><button class="btng" id="themeToggle">🌙 Koyu</button></div>
+              <div class="li"><div>Oturum</div><button class="btng" id="logoutBtn">Çıkış yap</button></div>
+            </div>
+          </div>
+          <div><div id="indirmelerBox" data-mode="customer"></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/indirmeler.js"></script>
+  <script src="/patron2/app.js?v=4"></script>
+  <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('/patron2/sw.js').catch(() => {})); }</script>
+</body>
+</html>
